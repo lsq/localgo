@@ -1,0 +1,21 @@
+name: Sync Upstream Tags
+
+on:
+  schedule:
+    - cron: '0 * */5 * *'  # 每6小时检查一次
+  workflow_dispatch:        # 支持手动触发
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write       # 推送标签和提交代码
+    steps:
+      - name: Update golang-dist mirror
+        uses: projg2/golang-dist-mirror-action@master # 替换为实际发布的版本/tag
+        with:
+          token: ${{ secrets.WORKFLOW_TOKEN }}
+          tag-filter: 'v*'                   # 只处理以 v 开头的标签
+          exclude-directories: 'tests examples'  # 生成 vendor dist 时排除这些目录
+          vendor-dir-format: '${{ github.event.repository.name }}-@TAG@'   # 源码包内顶层目录名格式
+          # upstream-repo: https://github.com/original/project  # 若非 fork 则需显式指定
